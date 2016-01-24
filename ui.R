@@ -15,12 +15,13 @@ shinyUI(fluidPage(
     ),
 
     mainPanel(
+      textOutput("captionPrice"),
+      textOutput("captionProduct"),
+      
       h4("Price Range:", textOutput("captionPrice", container = span), style="color:lightblue"),
       h4("Product Chosen: ", textOutput("captionProduct", container = span), style="color:lightblue"),
-      br,
-      #plotOutput("liquorplot")
-      tableOutput("summary")
-
+      br
+     
  
     )
   )

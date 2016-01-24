@@ -1,20 +1,14 @@
 library(shiny)
+library(ggplot2)
 library(plyr)
 library(dplyr)
-library(ggplot2)
 library(DT)
-
 
 mydf <- read.csv("bcl-data.csv", stringsAsFactors=FALSE)
 
-
-isAcceptable <- function(x)
+hasData <- function(x)
 {
-  if (is.null(x)){
-    
-    return (FALSE)
-  }
-  else if (nrow(x) == 0){
+  if (nrow(x) == 0){
     
     return (FALSE)
   }    
@@ -24,29 +18,70 @@ isAcceptable <- function(x)
 
 
 
-################################################################## 
-
-
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
-  currDataset <- reactive({
-    mydf %>% filter(Price >= input$price[1], Price <= input$price[2])
+  output$captionPrice <- renderText({
+    paste("Price range: ", input$price[1], "to ", input$price[2], " dollars")
+  })
+  
+  output$captionProduct <- renderText({
+    paste("Product: ", input$type, " from ", input$countryInput)
   })
   
   
   
-  bigDF <- reactive({
-    currDataset() %>% filter(Type == input$type, Country == input$countryInput)
+  bigdf <- reactive({
+    mydf %>% filter(Price >= input$price[1], Price <= input$price[2], 
+                    Type == input$type)
   })
   
   
- 
+  theDF <- reactive({    
+    dataset <- bigdf()
+    
+    if (nrow(dataset) == 0){
+      return ()
+    }
+    
+    dataset %>%
+      filter(
+        #Subtype == input$subtype,
+        
+        Country == input$countryInput
+      )
+  })
+  
+  
+  
+  dfTally <- reactive({    
+    ddply(theDF(), c("Country", "Type", "Subtype"), summarise, 
+          AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
+          MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL=length(Price))
+    
+  })
+  
+  
+  ###########################################################  
+  
+  dfSubtype <- reactive({
+    #     if (is.null(theDF())){
+    #       return (NULL)  
+    #     }
+    
+    dataset <- theDF() %>% filter(Type == input$type) %>% select(Subtype) %>% distinct()
+    
+    
+  })
+  
+  ###########################################################  
+  
+  
   output$captionPrice <- renderText({
     paste(input$price[1], "to ", input$price[2], " dollars")
   })
   
   output$captionProduct <- renderText({ 
-    if (isAcceptable(currDataset())){
+    if (hasData(currDataset())){
       paste(input$type, " from ", input$countryInput)
     }
     else
@@ -54,71 +89,120 @@ shinyServer(function(input, output) {
   })
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   output$productUI <- renderUI({
-    if (isAcceptable(currDataset())){
-      df <- currDataset()
-      radioButtons("type", "Product type:", unique(df$Type), selected = unique(df$Type)[1])
-    }
-    
-    else
-      (NULL)
+    radioButtons("type", "Product type:", unique(mydf$Type), selected = "WINE")  
   })
   
   
   output$countryUI <- renderUI({
-    if (isAcceptable(currDataset())){
-      thedf <- currDataset() %>% filter(Type == input$type)
-      selectInput("countryInput", "Country of Origin", sort(unique(thedf$Country)), 
-                  selected = thedf$Country[1])  
+    if (is.null(bigdf())){
+      return (NULL)  
     }
     
-    else
-      (NULL)
+    
+    dataset <- bigdf()
+    if (nrow(dataset) == 0){
+      return ()
+    }
+    
+    selectInput("countryInput", "Country of Origin",
+                sort(unique(dataset$Country)),
+                selected = dataset$Country[1])
   })
-
-
+  
+  
+  output$subtypeUI <- renderUI({
+    # radioButtons("subtype", "Available in:", unique(dfSubtype()$Subtype), selected = dfSubtype()$Subtype[1])
+  })
+  
+  ########################################################### 
+  #  
+  #  output$subproductUI <- renderUI({
+  #    radioButtons("subtype", "Sub Product type:", unique(mydf$subType), selected = "Red WINE")      
+  #  })
+  #
+  
   
   
   output$subtypeList <- renderTable({
-    if (isAcceptable(currDataset())){
-      thedf <- currDataset() %>% filter(Type == input$type, Country == input$countryInput) %>% select(Subtype) %>% distinct()
-      names(thedf) <- c("Available in")
-      thedf 
-    }
-    
-    else
-      (NULL)
+    dataset <- dfSubtype()
+    names(dataset) <- c("Available in")
+    dataset
   })
+  
+  
   
   
   output$liquorplot <- renderPlot({
-    if (isAcceptable(currDataset())){
-      ggplot(bigDF(), aes(Alcohol_Content)) +
-        geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) 
+    if (is.null(theDF())) {
+      print("theDF is not ready")
+      return()
     }
     
-  })
-
-
-  
-
-  output$summary <- renderTable({
-    if (isAcceptable(currDataset())){
-      thedf <- ddply(bigDF(), c("Country", "Type", "Subtype"), summarise, 
-                     AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
-                     MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
-  
-      thedf %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
-    }
+    
+    ggplot(theDF(), aes(Alcohol_Content)) +
+      geom_histogram(colour="grey", fill="lightblue", bins=25) 
+    
   })
   
   
-  
+  #output$results <- renderTable({
   output$results <- DT::renderDataTable({
-    if (isAcceptable(currDataset())){
-      thedf <- bigDF()
-      thedf[,c("Subtype", "Name", "Alcohol_Content", "Price", "Sweetness")]
-    }
+    dataset <- theDF()  
+    dataset[,c("Subtype", "Name", "Alcohol_Content", "Price", "Sweetness")]
   })
- 
+  
+  
+  
+  
+  
+  ###########################################################  
+  output$summary <- renderTable({
+    dataset <- dfTally()
+    dataset[,c("Subtype", "AVG_PRICE", "MIN_PRICE", "MAX_PRICE", "AVG_ALCOHOL_CONTENT", "TOTAL")]
+  })
+  
+  
+  ###########################################################  
+  
+  observe({   
+    print(input$price)
+  })
+  ########################################################### 
+  
 })
+
+
+# selectInput("countryInput", "Country of Origin",
+#             sort(unique(mydf$Country)),
+#             selected = "CANDA")
+
+
+# theDF <- reactive({
+#       if (is.null(input$countryInput)){
+#         return (NULL)
+#       }
+#  
+#   mydf %>%
+#     filter(Price >= input$price[1],
+#            Price <= input$price[2],
+#            Type == input$type,
+#            
+#            #Subtype == input$subtype,
+#            
+#            Country == input$countryInput
+#     )
+# })
