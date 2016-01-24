@@ -36,13 +36,22 @@ shinyServer(function(input, output) {
   
   
   bigDF <- reactive({
-    currDataset() %>% filter(Type == input$type, Country == input$countryInput)
+    if (is.null(input$type)){
+      return (NULL)
+    }
+    
+    else if (is.null(input$countryInput)){
+      return (NULL)
+    }
+    
+    else
+      currDataset() %>% filter(Type == input$type, Country == input$countryInput)
   })
   
-  
+
   
   output$captionPrice <- renderText({
-    paste(input$price[1], "to ", input$price[2], " dollars")
+    paste(input$price[1], "to ", input$price[2], " Canadian dollars")
   })
   
   output$captionProduct <- renderText({ 
@@ -84,12 +93,16 @@ shinyServer(function(input, output) {
   
   output$subtypeList <- renderTable({
     if (isAcceptable(currDataset())){
-      thedf <- currDataset() %>% filter(Type == input$type, Country == input$countryInput) %>% select(Subtype) %>% distinct()
-      names(thedf) <- c("Available in")
       
-      if (isAcceptable(thedf)){
-        thedf 
+      if (!is.null(input$countryInput)){
+        thedf <- currDataset() %>% filter(Type == input$type, Country == input$countryInput) %>% select(Subtype) %>% distinct()
+        names(thedf) <- c("Available in")
+        
+        if (isAcceptable(thedf)){
+          thedf 
+        }
       }
+      
     }
     
     else
@@ -102,32 +115,47 @@ shinyServer(function(input, output) {
   
   output$liquorplot <- renderPlot({
     if (isAcceptable(currDataset())){
-      ggplot(bigDF(), aes(Alcohol_Content)) +
-        geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) 
+      
+      thedf <- bigDF()
+      if (!is.null(thedf))
+      {
+        
+        ggplot(thedf, aes(Alcohol_Content)) +
+          geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) 
+      }
     }
     
   })
   
   
+    
+    output$results <- DT::renderDataTable({
+      if (isAcceptable(currDataset())){
+  
+        thedf <- bigDF()
+        if (!is.null(thedf))
+        {
+          thedf[,c("Subtype", "Name", "Alcohol_Content", "Price", "Sweetness")]
+        }
+      }
+    })
   
   
-  output$summary <- renderTable({
-    if (isAcceptable(currDataset())){
-      thedf <- ddply(bigDF(), c("Country", "Type", "Subtype"), summarise, 
-                     AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
-                     MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
-      
-      thedf %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
-    }
-  })
-  
-  
-  
-  output$results <- DT::renderDataTable({
-    if (isAcceptable(currDataset())){
-      thedf <- bigDF()
-      thedf[,c("Subtype", "Name", "Alcohol_Content", "Price", "Sweetness")]
-    }
-  })
+    output$summary <- renderTable({
+      if (isAcceptable(currDataset())){
+        
+        thedf <- bigDF()
+        if (!is.null(thedf)){
+          df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
+                       AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
+                       MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
+    
+          df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+        }
+      }
+    })
+    
+    
+ 
   
 })

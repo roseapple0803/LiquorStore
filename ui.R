@@ -20,11 +20,8 @@ shinyUI(fluidPage(
       br(),
       uiOutput("productUI"),
       uiOutput("countryUI"),
-      
-      tableOutput("subtypeList"),
-      
-      uiOutput("numUI"),
-      uiOutput("selectUI")
+      tableOutput("subtypeList")
+
     ),
     
     # Show a plot of the generated distribution
@@ -33,12 +30,12 @@ shinyUI(fluidPage(
       h4("Product: ", textOutput("captionProduct", container = span), style="color:lightblue"),
       br(),
       
-      
-      tabsetPanel(type = "tabs", 
-                  tabPanel("Plot", plotOutput("liquorplot")), 
-                  tabPanel("Tally", tableOutput("summary")), 
-                  tabPanel("List", DT::dataTableOutput("results"))
-      )
+    
+            tabsetPanel(type = "tabs", 
+                        tabPanel("Plot", plotOutput("liquorplot")), 
+                        tabPanel("Tally", tableOutput("summary")), 
+                        tabPanel("List", DT::dataTableOutput("results"))
+            )
       
     )
   )
