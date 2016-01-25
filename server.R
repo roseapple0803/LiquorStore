@@ -1,5 +1,4 @@
 library(shiny)
-library(plyr)
 library(dplyr)
 library(ggplot2)
 library(DT)
@@ -23,8 +22,6 @@ isAcceptable <- function(x)
 }
 
 
-
-################################################################## 
 
 
 shinyServer(function(input, output) {
@@ -110,22 +107,30 @@ shinyServer(function(input, output) {
   })
   
   
-  
-  ######################################################
+
   
   output$liquorplot <- renderPlot({
     if (isAcceptable(currDataset())){
       
       thedf <- bigDF()
       if (!is.null(thedf))
-      {
+      { 
+        thestart <- range(thedf$Alcohol_Content)[1]
+        theend <- range(x$Alcohol_Content)[2]
+        thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
         
+        avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
         ggplot(thedf, aes(Alcohol_Content)) +
-          geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) 
+          geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) + 
+          scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
+          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="red", size=1) + 
+          annotate("text", x=-Inf, y=Inf, label=avgMsg, hjust=-.2, vjust=3, label=avgMsg)
       }
     }
     
   })
+  
+
   
   
     
@@ -146,16 +151,23 @@ shinyServer(function(input, output) {
         
         thedf <- bigDF()
         if (!is.null(thedf)){
-          df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
-                       AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
-                       MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
+#           df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
+#                        AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
+#                        MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
+#           df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
     
-          df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+          
+          df <- thedf %>% group_by(Country, Type, Subtype) %>% 
+                          summarise(AVG_PRICE=mean(Price, na.rm=TRUE), 
+                                    MIN_PRICE=min(Price, na.rm=TRUE),
+                                    MAX_PRICE=max(Price, na.rm=TRUE), 
+                                    AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), 
+                                    TOTAL_LABELS=length(Price)) %>%
+                          select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+ 
         }
       }
     })
     
     
- 
-  
 })
