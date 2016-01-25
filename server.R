@@ -1,4 +1,5 @@
 library(shiny)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(DT)
@@ -120,10 +121,16 @@ shinyServer(function(input, output) {
         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
         
         avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
+        
         ggplot(thedf, aes(Alcohol_Content)) +
           geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) + 
+          ggtitle("Histogram of Alcohol Content") + ylab("Count") +
+          theme(plot.title=element_text(size=rel(1.5),face="bold")) + 
+        
           scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
-          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="red", size=1) + 
+          theme(axis.text=element_text(size=12),
+                  axis.title=element_text(size=14,face="bold")) +
+          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="tomato2", size=1) + 
           annotate("text", x=-Inf, y=Inf, label=avgMsg, hjust=-.2, vjust=3, label=avgMsg)
       }
     }
@@ -151,23 +158,32 @@ shinyServer(function(input, output) {
         
         thedf <- bigDF()
         if (!is.null(thedf)){
-#           df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
-#                        AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
-#                        MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
-#           df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+          df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
+                       AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
+                       MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
+          df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
     
           
-          df <- thedf %>% group_by(Country, Type, Subtype) %>% 
-                          summarise(AVG_PRICE=mean(Price, na.rm=TRUE), 
-                                    MIN_PRICE=min(Price, na.rm=TRUE),
-                                    MAX_PRICE=max(Price, na.rm=TRUE), 
-                                    AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), 
-                                    TOTAL_LABELS=length(Price)) %>%
-                          select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+#           thedf %>% group_by(Country, Type, Subtype) %>% 
+#                           summarise(AVG_PRICE=mean(Price, na.rm=TRUE), 
+#                                     MIN_PRICE=min(Price, na.rm=TRUE),
+#                                     MAX_PRICE=max(Price, na.rm=TRUE), 
+#                                     AVG_ALCOHOL_CONTENT=mean(Alcohol_Content, na.rm=TRUE), 
+#                                     TOTAL_LABELS=length(Price)) %>%
+#                           select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
  
         }
       }
     })
+
+
     
-    
+    output$helpguide <- renderUI({
+      HTML(paste("This small Shiny application demonstrates Shiny's automatic UI updates.", 
+                 "Move the Number of bins slider and notice how the renderPlot expression is automatically 
+                  re-evaluated when its dependant, input$bins,changes,causing a histogram with 
+                 a new number of bins to be rendered.", "Hello", "World", sep="<br/><br/>"))
+
+    })
+
 })
