@@ -20,11 +20,10 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      h4("Price Range:", textOutput("captionPrice", container = span), style="color:lightblue"),
-      h4("Product: ", textOutput("captionProduct", container = span), style="color:lightblue"),
+      h4("Price Range:", textOutput("captionPrice", container = span), style="color:steelblue"),
+      h4("Product: ", textOutput("captionProduct", container = span), style="color:steelblue"),
       br(),
-      
-    
+      br(),
             tabsetPanel(type = "tabs", 
                         tabPanel("Plot", br(), br(), plotOutput("liquorplot")), 
                         tabPanel("Tally", tableOutput("summary")), 

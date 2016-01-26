@@ -117,7 +117,7 @@ shinyServer(function(input, output) {
       if (!is.null(thedf))
       { 
         thestart <- range(thedf$Alcohol_Content)[1]
-        theend <- range(x$Alcohol_Content)[2]
+        theend <- range(thedf$Alcohol_Content)[2]
         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
         
         avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
