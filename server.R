@@ -130,7 +130,7 @@ shinyServer(function(input, output) {
           scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
           theme(axis.text=element_text(size=12),
                   axis.title=element_text(size=14,face="bold")) +
-          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="tomato2", size=1) + 
+          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="salmon", size=1) + 
           annotate("text", x=-Inf, y=Inf, label=avgMsg, hjust=-.2, vjust=3, label=avgMsg)
       }
     }
@@ -138,7 +138,7 @@ shinyServer(function(input, output) {
   })
   
 
-  
+  # col="tomato2"
   
     
     output$results <- DT::renderDataTable({
