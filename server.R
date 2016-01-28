@@ -45,7 +45,21 @@ shinyServer(function(input, output) {
     else
       currDataset() %>% filter(Type == input$type, Country == input$countryInput)
   })
-  
+ #################################
+ 
+ output$echo <- renderUI({
+   
+   if (isAcceptable(currDataset())){
+     echoProduct <- paste(input$type, " from ", input$countryInput)
+   }
+   else
+     echoProduct <- "NONE available"
+   
+   list("Price Range:", 
+    input$price[1], "to ", input$price[2], " Canadian dollars", br(), "Product: ", echoProduct)
+ })
+ 
+ #################################
 
   
   output$captionPrice <- renderText({

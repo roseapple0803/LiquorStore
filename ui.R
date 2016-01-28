@@ -1,31 +1,48 @@
 library(shiny)
 
+# shinyUI(fluidPage(theme = "bootstrap.css", 
 shinyUI(fluidPage(
-  titlePanel("Welcome to BC Liquor Store",windowTitle = "Liquor Price"),
- 
-  sidebarLayout(
-    sidebarPanel(  
+     tags$head(
+      tags$style(HTML("
+      @import url('https://fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
+            "))
+                  ),           
+  
+  titlePanel(
+    h1("Welcome to BC Liquor Store", style = "font-family: 'Lobster', cursive;align = 'center';
+          font-weight: 500;color: #ff1111"), 
+      windowTitle = "Liquor Price"),
      
-      sliderInput("price", "Choose your price range:", min=1, max=100, c(5,40), pre="$"), 
+  sidebarLayout( 
+    sidebarPanel(  
+      sliderInput("price", "Choose your price range:", min=1, max=100, c(50,70), pre="$"), 
       br(),
       uiOutput("productUI"),
       uiOutput("countryUI"),
-      tableOutput("subtypeList")
+      tableOutput("subtypeList"),
+      
+      tags$div(class = "header", checked = NA,
+               tags$a(href = "https://github.com/roseapple0803/DevDataProduct", "Click Here to read my codes!")
+              )
+               
     ),
     
     
     mainPanel(
-      h4("Price Range:", textOutput("captionPrice", container = span), style="color:steelblue"),
-      h4("Product: ", textOutput("captionProduct", container = span), style="color:steelblue"),
+#       h4("Price Range:", textOutput("captionPrice", container = span), 
+#          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
+#       h4("Product: ", textOutput("captionProduct", container = span), 
+#          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
+      uiOutput("echo"),
       br(),
       br(),
-            tabsetPanel(type = "tabs", 
+      tabsetPanel(type = "tabs", 
                         tabPanel("Plot", br(), br(), plotOutput("liquorplot")), 
                         tabPanel("Tally", tableOutput("summary")), 
                         tabPanel("List", DT::dataTableOutput("results")), 
                         tabPanel("Help", uiOutput("helpguide"))
-            )
-      
+      )
+
     )
   )
   
