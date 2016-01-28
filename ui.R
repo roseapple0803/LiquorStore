@@ -33,6 +33,7 @@ shinyUI(fluidPage(
 #          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
 #       h4("Product: ", textOutput("captionProduct", container = span), 
 #          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
+      h4("Search Criteria"),
       uiOutput("echo"),
       br(),
       br(),

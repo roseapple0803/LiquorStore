@@ -45,19 +45,33 @@ shinyServer(function(input, output) {
     else
       currDataset() %>% filter(Type == input$type, Country == input$countryInput)
   })
+  
+  
  #################################
  
  output$echo <- renderUI({
    
-   if (isAcceptable(currDataset())){
-     echoProduct <- paste(input$type, " from ", input$countryInput)
-   }
-   else
-     echoProduct <- "NONE available"
+#    if (isAcceptable(currDataset())){
+#      echoProduct <- paste(input$type, " from ", input$countryInput)
+#    }
+#    else
+#      echoProduct <- "NONE available"
    
-   list("Price Range:", 
-    input$price[1], "to ", input$price[2], " Canadian dollars", br(), "Product: ", echoProduct)
+#   
+   if (isAcceptable(currDataset())){
+     list("Price Range: ", span(input$price[1], style="color:salmon"), "to ", span(input$price[2], style="color:salmon"), 
+          " Canadian dollars", br(), "Product: ", span(input$type, style="color:salmon"), "from ", 
+          span(input$countryInput, style="color:salmon"))
+   }
+   
+   else{
+        list("Price Range: ", span(input$price[1], style="color:salmon"), "to ", span(input$price[2], style="color:salmon"), 
+             " Canadian dollars", br(), "Product: ", span("NONE available", stype="color:salmon"))
+      }
+ 
  })
+ 
+ 
  
  #################################
 
@@ -130,8 +144,10 @@ shinyServer(function(input, output) {
       thedf <- bigDF()
       if (!is.null(thedf))
       { 
-        thestart <- range(thedf$Alcohol_Content)[1]
-        theend <- range(thedf$Alcohol_Content)[2]
+#         thestart <- range(thedf$Alcohol_Content)[1]
+#         theend <- range(thedf$Alcohol_Content)[2]
+        thestart <- min(thedf$Alcohol_Content)
+        theend <- max(thedf$Alcohol_Content)
         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
         
         avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
