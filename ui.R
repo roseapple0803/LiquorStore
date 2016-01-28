@@ -10,7 +10,7 @@ shinyUI(fluidPage(
   
   titlePanel(
     h1("Welcome to BC Liquor Store", style = "font-family: 'Lobster', cursive;align = 'center';
-          font-weight: 500;color: #ff1111"), 
+          font-weight: 500;color: steelblue"), 
       windowTitle = "Liquor Price"),
      
   sidebarLayout( 
@@ -29,11 +29,7 @@ shinyUI(fluidPage(
     
     
     mainPanel(
-#       h4("Price Range:", textOutput("captionPrice", container = span), 
-#          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
-#       h4("Product: ", textOutput("captionProduct", container = span), 
-#          style="color:steelblue; font-family:'Verdana'; font-si12pt"),
-      h4("Search Criteria"),
+      strong("Your search criteria"),
       uiOutput("echo"),
       br(),
       br(),

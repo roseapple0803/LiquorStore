@@ -60,13 +60,13 @@ shinyServer(function(input, output) {
 #   
    if (isAcceptable(currDataset())){
      list("Price Range: ", span(input$price[1], style="color:salmon"), "to ", span(input$price[2], style="color:salmon"), 
-          " Canadian dollars", br(), "Product: ", span(input$type, style="color:salmon"), "from ", 
-          span(input$countryInput, style="color:salmon"))
+          " Canadian Dollars", br(), "Product: ", span(input$type, style="color:salmon"), "from ", 
+          span(input$countryInput, style='color:salmon'))
    }
    
    else{
         list("Price Range: ", span(input$price[1], style="color:salmon"), "to ", span(input$price[2], style="color:salmon"), 
-             " Canadian dollars", br(), "Product: ", span("NONE available", stype="color:salmon"))
+             " Canadian Dollars", br(), "Product: ", span("NONE available", stype="color:salmon"))
       }
  
  })
@@ -75,19 +75,7 @@ shinyServer(function(input, output) {
  
  #################################
 
-  
-  output$captionPrice <- renderText({
-    paste(input$price[1], "to ", input$price[2], " Canadian dollars")
-  })
-  
-  output$captionProduct <- renderText({ 
-    if (isAcceptable(currDataset())){
-      paste(input$type, " from ", input$countryInput)
-    }
-    else
-      paste("NONE available")
-  })
-  
+
   
   output$productUI <- renderUI({
     if (isAcceptable(currDataset())){
@@ -144,11 +132,10 @@ shinyServer(function(input, output) {
       thedf <- bigDF()
       if (!is.null(thedf))
       { 
-#         thestart <- range(thedf$Alcohol_Content)[1]
-#         theend <- range(thedf$Alcohol_Content)[2]
-        thestart <- min(thedf$Alcohol_Content)
-        theend <- max(thedf$Alcohol_Content)
-        thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
+
+#         thestart <- min(thedf$Alcohol_Content)
+#         theend <- max(thedf$Alcohol_Content)
+#         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
         
         avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
         
@@ -157,7 +144,9 @@ shinyServer(function(input, output) {
           ggtitle("Histogram of Alcohol Content") + ylab("Count") +
           theme(plot.title=element_text(size=rel(1.5),face="bold")) + 
         
-          scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
+#           scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
+          
+          
           theme(axis.text=element_text(size=12),
                   axis.title=element_text(size=14,face="bold")) +
           geom_vline(xintercept= mean(thedf$Alcohol_Content), col="salmon", size=1) + 
@@ -193,14 +182,6 @@ shinyServer(function(input, output) {
                        MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
           df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
     
-          
-#           thedf %>% group_by(Country, Type, Subtype) %>% 
-#                           summarise(AVG_PRICE=mean(Price, na.rm=TRUE), 
-#                                     MIN_PRICE=min(Price, na.rm=TRUE),
-#                                     MAX_PRICE=max(Price, na.rm=TRUE), 
-#                                     AVG_ALCOHOL_CONTENT=mean(Alcohol_Content, na.rm=TRUE), 
-#                                     TOTAL_LABELS=length(Price)) %>%
-#                           select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
  
         }
       }
@@ -209,10 +190,17 @@ shinyServer(function(input, output) {
 
     
     output$helpguide <- renderUI({
-      HTML(paste("This small Shiny application demonstrates Shiny's automatic UI updates.", 
-                 "Move the Number of bins slider and notice how the renderPlot expression is automatically 
+#       HTML(paste("This small Shiny application demonstrates Shiny's automatic UI updates.", 
+#                  "Move the Number of bins slider and notice how the renderPlot expression is automatically 
+#                   re-evaluated when its dependant, input$bins,changes,causing a histogram with 
+#                  a new number of bins to be rendered.", "Hello", "World", sep="<br/><br/>"))
+      
+      
+      list("This ",  span("small Shiny application", style='color:salmon'), "demonstrates Shiny's automatic UI updates.", br(),br(), 
+           "Move the Number of bins slider and notice how the renderPlot expression is automatically 
                   re-evaluated when its dependant, input$bins,changes,causing a histogram with 
-                 a new number of bins to be rendered.", "Hello", "World", sep="<br/><br/>"))
+                 a new number of bins to be rendered.", br(),br(),
+           strong("Hello"), br(),"World")
 
     })
 
