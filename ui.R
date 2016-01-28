@@ -30,6 +30,7 @@ shinyUI(fluidPage(
     
     mainPanel(
       strong("Your search criteria"),
+     
       uiOutput("echo"),
       br(),
       br(),

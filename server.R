@@ -132,32 +132,42 @@ shinyServer(function(input, output) {
       thedf <- bigDF()
       if (!is.null(thedf))
       { 
-
-#         thestart <- min(thedf$Alcohol_Content)
-#         theend <- max(thedf$Alcohol_Content)
-#         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
+        thedf <- thedf[!is.na(thedf$Alcohol_Content),]
         
-        avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
+        thestart <- min(thedf$Alcohol_Content)
+        theend <- max(thedf$Alcohol_Content)
+        thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
+         
+        if (!is.null(thedf$Alcohol_Content)){
+          avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
         
-        ggplot(thedf, aes(Alcohol_Content)) +
-          geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) + 
-          ggtitle("Histogram of Alcohol Content") + ylab("Count") +
-          theme(plot.title=element_text(size=rel(1.5),face="bold")) + 
+          ggplot(thedf, aes(Alcohol_Content)) +
+            geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) + 
+ 
+            ggtitle("Histogram of Alcohol Content") + ylab("Count") +
+            theme(plot.title=element_text(size=rel(1.5),face="bold")) + 
         
-#           scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
+            scale_x_continuous(breaks=seq(thestart, theend, thestep)) +
+           
           
-          
-          theme(axis.text=element_text(size=12),
+            theme(axis.text=element_text(size=12),
                   axis.title=element_text(size=14,face="bold")) +
-          geom_vline(xintercept= mean(thedf$Alcohol_Content), col="salmon", size=1) + 
-          annotate("text", x=-Inf, y=Inf, label=avgMsg, hjust=-.2, vjust=3, label=avgMsg)
+            geom_vline(xintercept= mean(thedf$Alcohol_Content), col="salmon", size=1) + 
+            annotate("text", x=-Inf, y=Inf, label=avgMsg, hjust=-.2, vjust=3, label=avgMsg)
+        }
+
+        else{
+          print(thedf$Alcohol_Content)        
+          return()
+        }
+
       }
     }
     
   })
   
 
-  # col="tomato2"
+ 
   
     
     output$results <- DT::renderDataTable({
@@ -180,10 +190,18 @@ shinyServer(function(input, output) {
           df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
                        AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
                        MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
-          df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
-    
- 
+        
+          # make sure $AVG_PRICE is there
+          if (!is.null(df$AVG_PRICE)){
+            df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+          }
+          else{
+            #print(df$AVG_PRICE)
+            return()
+          }
         }
+       
+          
       }
     })
 
