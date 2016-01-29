@@ -22,9 +22,9 @@ shinyUI(fluidPage(
       tableOutput("subtypeList"),
       
       tags$div(class = "header", checked = NA,
-               tags$a(href = "https://github.com/roseapple0803/DevDataProduct", "Click Here to read my codes!")
+                tags$a(href = "https://github.com/roseapple0803/DevDataProduct", "Click Here to read my codes!")
               )
-               
+                
     ),
     
     

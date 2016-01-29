@@ -132,6 +132,7 @@ shinyServer(function(input, output) {
       thedf <- bigDF()
       if (!is.null(thedf))
       { 
+        # remove all the rows with NA Alcohol_Content 
         thedf <- thedf[!is.na(thedf$Alcohol_Content),]
         
         thestart <- min(thedf$Alcohol_Content)
@@ -139,7 +140,7 @@ shinyServer(function(input, output) {
         thestep <- ifelse((theend - thestart) >= 2, 2, 0.1)
          
         if (!is.null(thedf$Alcohol_Content)){
-          avgMsg <- paste("Average alcohol content is ", round(mean(thedf$Alcohol_Content),2))
+          avgMsg <- paste("Average alcohol content within your search criteria is ", round(mean(thedf$Alcohol_Content),2))
         
           ggplot(thedf, aes(Alcohol_Content)) +
             geom_histogram(fill="lightblue", colour ="slateblue4", bins=25) + 
@@ -214,12 +215,22 @@ shinyServer(function(input, output) {
 #                  a new number of bins to be rendered.", "Hello", "World", sep="<br/><br/>"))
       
       
-      list("This ",  span("small Shiny application", style='color:salmon'), "demonstrates Shiny's automatic UI updates.", br(),br(), 
-           "Move the Number of bins slider and notice how the renderPlot expression is automatically 
-                  re-evaluated when its dependant, input$bins,changes,causing a histogram with 
-                 a new number of bins to be rendered.", br(),br(),
-           strong("Hello"), br(),"World")
+#       list("This samll ",  span("Shiny application", style='color:salmon'), "demonstrates Shiny's automatic UI updates.", br(),br(), 
+#            "Move the Number of bins slider and notice how the renderPlot expression is automatically 
+#                   re-evaluated when its dependant, input$bins,changes,causing a histogram with 
+#                  a new number of bins to be rendered.", br(),br(),
+#            strong("Hello"), br(),"World")
+      
+      list("This small ",  strong("Shiny application"), "demonstrates Shiny's automatic UI updates.", br(),br(), 
+           "To start using the app, ", br(), "* decide on your price range by moving the slider or ", br(), 
+           "* pick your product type or ", br(), 
+           "* choose country of origin from the drop down list", br(),br(),
+
+          "Notice how all the related data are automatically re-evaluated and refreshed.",
+           br(),br(),
+           "Also click a tab such as ", strong("Plot"), "or ", strong("Tally"), "to see corresponding histogram plot and data display based on your search criteria.")
 
     })
+
 
 })
