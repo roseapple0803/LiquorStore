@@ -5,7 +5,9 @@ library(ggplot2)
 library(DT)
 
 
-mydf <- read.csv("bcl-data.csv", stringsAsFactors=FALSE)
+ 
+#mydf <- read.csv("bcl-data.csv", stringsAsFactors=FALSE)
+mydf <- readRDS("alcohol.rds")
 
 
 isAcceptable <- function(x)
@@ -206,6 +208,34 @@ shinyServer(function(input, output) {
       }
     })
 
+
+
+  output$summaryView <- renderPlot({
+    if (isAcceptable(currDataset())){
+      
+      thedf <- bigDF()
+      if (!is.null(thedf)){
+        df <- ddply(thedf, c("Country", "Type", "Subtype"), summarise, 
+                    AVG_PRICE=mean(Price, na.rm=TRUE), MIN_PRICE=min(Price, na.rm=TRUE), 
+                    MAX_PRICE=max(Price, na.rm=TRUE), AVG_ALCOHOL_CONTENT=mean(Alcohol_Content), TOTAL_LABELS=length(Price))
+        
+        # make sure $AVG_PRICE is there
+        if (!is.null(df$AVG_PRICE)){
+          filtered <- df %>% select(Subtype, AVG_PRICE, MIN_PRICE, MAX_PRICE, AVG_ALCOHOL_CONTENT, TOTAL_LABELS)
+          
+          ggplot(data=filtered, aes(x=reorder(Subtype, TOTAL_LABELS), y=TOTAL_LABELS)) + 
+            geom_bar(stat = "identity", colour="red") + coord_flip()
+        }
+        else{
+          #print(df$AVG_PRICE)
+          return()
+        }
+      }
+      
+      
+    }
+    
+  })
 
     
     output$helpguide <- renderUI({

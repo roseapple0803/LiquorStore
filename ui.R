@@ -26,7 +26,7 @@ shinyUI(fluidPage(
               )
                 
     ),
-    
+
     
     mainPanel(
       strong("Your search criteria"),
@@ -37,7 +37,8 @@ shinyUI(fluidPage(
       tabsetPanel(type = "tabs", 
                         tabPanel("Plot", br(), br(), plotOutput("liquorplot")), 
                         tabPanel("Tally", tableOutput("summary")), 
-                        tabPanel("List", DT::dataTableOutput("results")), 
+                        tabPanel("TallyChart", plotOutput("summaryView")), 
+                        tabPanel("ProductList", DT::dataTableOutput("results")), 
                         tabPanel("Help", uiOutput("helpguide"))
       )
 
